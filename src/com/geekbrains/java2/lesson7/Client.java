@@ -4,6 +4,7 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
+import java.util.Scanner;
 
 public class Client {
     public static void setAuthorized(boolean authorized) {
@@ -51,6 +52,22 @@ public class Client {
             });
             t.setDaemon(true);
             t.start();
+
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    Scanner scanner = new Scanner(System.in);
+                    while (socket.isConnected()) {
+                        String msg = scanner.nextLine();
+
+                        try {
+                            out.writeUTF(msg);
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }
+            }).start();
         } catch (IOException e) {
             e.printStackTrace();
         }

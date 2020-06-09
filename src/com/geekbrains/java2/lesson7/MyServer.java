@@ -52,6 +52,15 @@ public class MyServer {
         }
     }
 
+    public synchronized void sendPersonalMsg(String recipient, String message) {
+        System.out.println("Sending private message to " + recipient);
+        for(ClientHandler client: clients) {
+            if (client.getName().equals(recipient)) {
+                client.sendMsg(message);
+            }
+        }
+    }
+
     public synchronized boolean isNickLogged(String nick) {
         for(ClientHandler client: clients) {
             if (client.getName().equals(nick)) {

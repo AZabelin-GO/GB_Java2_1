@@ -54,11 +54,16 @@ public class ClientHandler {
         while (true) {
             if (in.available()>0) {
                 String message = in.readUTF();
-                System.out.println("From " + name + ":" + message);
                 if (message.equals("/end")) {
                     return;
+                } else if (message.startsWith("/w")) {
+                    String recipient = message.split("\\s")[1];
+                    message = name + ":" + message.replaceAll("^/w\\s[^\\s]+", "");
+                    myServer.sendPersonalMsg(recipient, message);
+                } else {
+                    System.out.println("From " + name + ": " + message);
+                    myServer.broadcast(name + ": " + message);
                 }
-                myServer.broadcast(name + ": " + message);
             }
         }
     }
