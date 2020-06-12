@@ -6,11 +6,14 @@ import java.io.IOException;
 import java.net.Socket;
 
 public class ClientHandler {
+    private static final long TIMEOUT = 120000;
+
     private MyServer myServer;
     private Socket socket;
     private DataInputStream in;
     private DataOutputStream out;
     private String name;
+    private long creationTime;
 
     public String getName() {
         return name;
@@ -20,6 +23,7 @@ public class ClientHandler {
         this.myServer = myServer;
         this.socket = socket;
         this.name = "";
+        this.creationTime = System.currentTimeMillis();
         try {
             this.in = new DataInputStream(socket.getInputStream());
             this.out = new DataOutputStream(socket.getOutputStream());
@@ -60,7 +64,7 @@ public class ClientHandler {
                 }
                 if (message.startsWith("/w ")) {
                     String[] parts = message.split("\\s");
-                    myServer.sendDirect(parts[1],name+ ": "+ parts[2]);
+                    myServer.sendDirect(parts[1],name + ": "+ parts[2]);
                 } else myServer.broadcast(name + ": " + message);
             }
         }
@@ -68,6 +72,10 @@ public class ClientHandler {
 
     private void authenticate() throws IOException {
         while(true) {
+            if ((System.currentTimeMillis() - this.creationTime > TIMEOUT) && (this.name.isEmpty())) {
+                out.writeUTF("Authentication timeout");
+                throw new IOException("Authentication timeout");
+            }
             if (in.available()>0){
                 String str = in.readUTF();
                 if (str.startsWith("/auth")) {
